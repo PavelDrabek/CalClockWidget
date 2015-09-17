@@ -42,25 +42,30 @@ public class MyClock extends ImageView {
         setMeasuredDimension(d,d); */
 
     }
-    @Override
 
+    @Override
     protected void onDraw(Canvas canvas){
-        //get the size of your control based on last call to onMeasure
-        int height = getMeasuredHeight();
-        int width = getMeasuredWidth();
-        // Now create a paint brush to draw your widget
-        Paint mTextPaint = new Paint();
-        mTextPaint.setColor(Color.GREEN);
-        // set’s paint’s text size
-        mTextPaint.setTextSize(40);
-        // Define the string you want to paint
-        String displayText = "My First Widget";
-        // Measure width of your text string
-        Float textWidth = mTextPaint.measureText(displayText);
-        //Find the center
-        int px= width/2;
-        int py=height/2;
-        // Draw the string in the center of the control
-        canvas.drawText(displayText, px-textWidth/2, py, mTextPaint);
+        super.onDraw(canvas);
+
+        return;
+
+//        //get the size of your control based on last call to onMeasure
+//        int height = getMeasuredHeight();
+//        int width = getMeasuredWidth();
+//        // Now create a paint brush to draw your widget
+//        Paint mTextPaint = new Paint();
+//        mTextPaint.setColor(Color.GREEN);
+//        // set’s paint’s text size
+//        mTextPaint.setTextSize(40);
+//        // Define the string you want to paint
+//        String displayText = "My First Widget";
+//        // Measure width of your text string
+//        Float textWidth = mTextPaint.measureText(displayText);
+//        //Find the center
+//        int px= width/2;
+//        int py=height/2;
+//        // Draw the string in the center of the control
+//        canvas.drawText(displayText, px-textWidth/2, py, mTextPaint);
     }
+
 }

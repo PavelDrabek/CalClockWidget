@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#facaa0">
+    android:background="#facaa0"
+    tools:showIn="@layout/widget_info">
 
 
     <TextView
@@ -12,6 +13,24 @@
         android:text="My widget"
         android:id="@+id/textView"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_toRightOf="@+id/include"
+        android:layout_toEndOf="@+id/include" />
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/cal_cell"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/include" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:src="@drawable/abc_btn_check_to_on_mtrl_015"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/include"
+        android:layout_toStartOf="@+id/include" />
 
 </RelativeLayout>
