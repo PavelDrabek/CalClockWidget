@@ -3,34 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="#facaa0"
-    tools:showIn="@layout/widget_info">
+    tools:showIn="@layout/widget_info"
+    android:id="@+id/widget_4x2">
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="My widget"
-        android:id="@+id/textView"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/include"
-        android:layout_toEndOf="@+id/include" />
 
     <include
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        layout="@layout/cal_cell"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/include" />
+        layout="@layout/part_clock"
+        android:id="@+id/part_clock"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
-    <ImageView
-        android:layout_width="wrap_content"
+    <include
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:src="@drawable/abc_btn_check_to_on_mtrl_015"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/include"
-        android:layout_toStartOf="@+id/include" />
-
+        layout="@layout/part_timeline"
+        android:id="@+id/part_timeline"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
