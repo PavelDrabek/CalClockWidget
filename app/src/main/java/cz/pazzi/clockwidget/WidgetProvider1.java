@@ -8,6 +8,10 @@ import android.widget.GridView;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import java.sql.Time;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by Pazzi on 16.9.2015.
  */
@@ -27,12 +31,32 @@ public class WidgetProvider1 extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-        Toast.makeText(context, "on update", Toast.LENGTH_LONG).show();
+
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
+
+        UpdateClock(views);
+        AppWidgetManager.getInstance(context).updateAppWidget(appWidgetIds, views);
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Toast.makeText(context, "on receive", Toast.LENGTH_LONG).show();
+    }
+
+    private String GetTimeString() {
+        Date date = Calendar.getInstance().getTime();
+        String str = String.format("%02d", date.getHours()) + ":" + String.format("%02d", date.getMinutes());
+        return str;
+    }
+
+    private String GetDateString() {
+        Date date = Calendar.getInstance().getTime();
+        String str = String.format("%d.%d.%d", date.getDay(), date.getMonth(), 1900 + date.getYear());
+        return str;
+    }
+
+    private void UpdateClock(RemoteViews views) {
+        views.setTextViewText(R.id.text_date, GetDateString());
+        views.setTextViewText(R.id.text_time, GetTimeString());
     }
 }
