@@ -30,6 +30,7 @@ public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... params) {
         try {
             mActivity.clearResultsText();
+//            mActivity.updateResultsText(getDataFromApi());
             getDataFromApi(); // TODO:
 
         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {

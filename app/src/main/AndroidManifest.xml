@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".Services.WidgetService" />
+
         <receiver
             android:name=".WidgetProvider1"
             android:label="My Widget" >

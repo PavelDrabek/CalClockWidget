@@ -5,14 +5,15 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.GridView;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
+
+import cz.pazzi.clockwidget.Services.WidgetService;
 
 /**
  * Created by Pazzi on 16.9.2015.
@@ -20,7 +21,6 @@ import java.util.Locale;
 public class WidgetProvider1 extends AppWidgetProvider {
 
     private GridView gridView;
-    protected Handler handler = new Handler();
 
     public WidgetProvider1() {
         super();
@@ -29,11 +29,15 @@ public class WidgetProvider1 extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
+        Log.d("WidgetProvider", "onEnabled");
+
+        context.startService(new Intent(context, WidgetService.class));
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+        Log.d("WidgetProvider", "updating");
 
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 
@@ -44,6 +48,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        Log.d("WidgetProvider", "onReceive");
     }
 
     private String GetTimeString() {

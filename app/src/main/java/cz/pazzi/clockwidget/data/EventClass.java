@@ -16,6 +16,12 @@ public class EventClass {
     public int backgroundColor;
     public int foregroundColor;
 
+    public EventClass(String name, DateTime start, DateTime end) {
+        this.name = name;
+        this.start = start;
+        this.end = end;
+    }
+
     public void SetBackgroundColor(String str) {
         backgroundColor = Color.parseColor(str);
     }
