@@ -1,20 +1,27 @@
 package cz.pazzi.clockwidget.AsyncTasks;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import cz.pazzi.clockwidget.Interfaces.ICalendarList;
+import cz.pazzi.clockwidget.GCalActivity;
+import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.data.GCalendar;
 
 /**
@@ -22,19 +29,30 @@ import cz.pazzi.clockwidget.data.GCalendar;
  */
 public class CalendarListAsyncTask extends AsyncTask<Void, Void, List<GCalendar>> {
 
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+
     com.google.api.services.calendar.Calendar mService;
     GoogleAccountCredential credential;
     final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-    ICalendarList watcher;
+    ICalendarListWatcher watcher;
+    Context context;
 
-    public CalendarListAsyncTask(ICalendarList watcher) {
+    public CalendarListAsyncTask(Context context, ICalendarListWatcher watcher) {
+        this.context = context;
         this.watcher = watcher;
     }
 
     @Override
     protected List<GCalendar> doInBackground(Void... params) {
+        SharedPreferences settings = context.getSharedPreferences(GCalActivity.class.getName(), Context.MODE_PRIVATE);
+        credential = GoogleAccountCredential.usingOAuth2(
+                context, Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff())
+                .setSelectedAccountName("pazzicz@gmail.com");
+//                .setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
         mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, credential)
@@ -48,8 +66,8 @@ public class CalendarListAsyncTask extends AsyncTask<Void, Void, List<GCalendar>
                 CalendarList calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
                 List<CalendarListEntry> calItems = calendarList.getItems();
 
-                for (CalendarListEntry calendarListEntry : calItems) {
-                    calendars.add(new GCalendar(calendarListEntry.getId()));
+                for (CalendarListEntry entry : calItems) {
+                    calendars.add( new GCalendar(entry.getId(), entry.getSummary(), entry.getBackgroundColor(), entry.getForegroundColor() ));
                 }
                 pageToken = calendarList.getNextPageToken();
             } catch (IOException e) { }

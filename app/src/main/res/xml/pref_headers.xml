@@ -1,0 +1,21 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$GeneralPreferenceFragment"
+        android:title="@string/pref_header_general" />
+
+    <header
+        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$CalendarPreferenceFragment"
+        android:title="@string/pref_header_calendars" />
+
+    <header
+        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$NotificationPreferenceFragment"
+        android:title="@string/pref_header_notifications" />
+
+    <header
+        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$DataSyncPreferenceFragment"
+        android:title="@string/pref_header_data_sync" />
+
+</preference-headers>

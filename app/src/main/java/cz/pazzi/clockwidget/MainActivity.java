@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import cz.pazzi.clockwidget.Activities.WidgetPreference;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -20,6 +22,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, GCalActivity.class);
+                startActivity(i);
+            }
+        });
+
+
+        Button btnPrefs = (Button)findViewById(R.id.btnPreferences);
+        btnPrefs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, WidgetPreference.class);
                 startActivity(i);
             }
         });

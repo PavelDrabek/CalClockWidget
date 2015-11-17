@@ -19,6 +19,7 @@ import cz.pazzi.clockwidget.data.EventClass;
 /**
  * Created by pavel on 02.10.15.
  */
+@Deprecated
 public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
     private GCalActivity mActivity;
 
@@ -93,10 +94,10 @@ public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
                         start = event.getStart().getDate();
                     }
 
-                    EventClass nEvent = new EventClass();
-                    nEvent.name = event.getSummary();
-                    nEvent.start = start;
-                    nEvent.end = event.getEnd().getDateTime();
+                    EventClass nEvent = new EventClass(event.getSummary(), start, event.getEnd().getDateTime());
+//                    nEvent.name = event.getSummary();
+//                    nEvent.start = start;
+//                    nEvent.end = event.getEnd().getDateTime();
                     nEvent.SetBackgroundColor(calendarListEntry.getBackgroundColor());
                     nEvent.SetForegroundColor(calendarListEntry.getForegroundColor());
 

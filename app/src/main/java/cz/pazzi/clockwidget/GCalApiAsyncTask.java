@@ -15,6 +15,7 @@ import java.util.*;
  * An asynchronous task that handles the Google Calendar API call.
  * Placing the API calls in their own task ensures the UI stays responsive.
  */
+@Deprecated
 public class GCalApiAsyncTask extends AsyncTask<Void, Void, Void> {
     private GCalActivity mActivity;
 

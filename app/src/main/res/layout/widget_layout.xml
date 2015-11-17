@@ -23,4 +23,13 @@
         android:id="@+id/part_timeline"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        android:id="@+id/imgSettings"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha" />
+
 </RelativeLayout>

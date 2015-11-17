@@ -7,6 +7,6 @@ import cz.pazzi.clockwidget.data.GCalendar;
 /**
  * Created by pavel on 03.11.15.
  */
-public interface ICalendarList {
+public interface ICalendarListWatcher {
     void OnCalendarsDownloaded(List<GCalendar> calendars);
 }

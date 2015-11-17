@@ -5,8 +5,14 @@ package cz.pazzi.clockwidget.data;
  */
 public class GCalendar {
     public String id;
+    public String summary;
+    public String backgroundColor;
+    public String foregroundColor;
 
-    public GCalendar(String id) {
+    public GCalendar(String id, String summary, String backgroundColor, String foregroundColor) {
         this.id = id;
+        this.summary = summary;
+        this.backgroundColor = backgroundColor;
+        this.foregroundColor = foregroundColor;
     }
 }

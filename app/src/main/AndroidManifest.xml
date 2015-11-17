@@ -45,6 +45,14 @@
             android:name=".GCalActivity"
             android:label="@string/title_activity_gcal" >
         </activity>
+        <activity
+            android:name=".Activities.Settings"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <activity
+            android:name=".Activities.WidgetPreference"
+            android:label="@string/title_activity_widget_preference" >
+        </activity>
     </application>
 
 </manifest>

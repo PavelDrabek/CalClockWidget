@@ -33,6 +33,7 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.List;
 
+@Deprecated
 public class GCalActivity extends Activity {
     /**
      * A Google Calendar API service object used to access the API.

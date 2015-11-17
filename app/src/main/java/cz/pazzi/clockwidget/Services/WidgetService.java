@@ -22,6 +22,8 @@ public class WidgetService extends Service {
     public static final int UPDATE_CALENDAR = 1;
 
     private List<EventClass> calEvents = null;
+    private long lastCalendarCheck = 0;
+    private int intervalCalendarCheck = 1 * 60 * 1000;
 
     private MyHandler handler = new MyHandler();
 
@@ -51,19 +53,24 @@ public class WidgetService extends Service {
 
         public void run() {
             synchronized (this) {
-                while (canRun) {
-                    try {
-                        long timeInMs = System.currentTimeMillis();
-                        int timeToNextMinute = 60000 - (int)(timeInMs % 60000);
-                        Log.d("thread", "time to next minute = " + timeToNextMinute);
-                        sleep(timeToNextMinute);
-
-                    } catch (Exception e) {
-                        Log.e(getPackageName(), "exception = " + e.toString());
-                    }
+                while (canRun)
+                {
+                    long timeInMs = System.currentTimeMillis();
 
                     handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CLOCK));
 
+                    if(lastCalendarCheck + intervalCalendarCheck < timeInMs) {
+                        lastCalendarCheck = timeInMs;
+                        handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CALENDAR));
+                    }
+
+                    try {
+                        int timeToNextMinute = 60000 - (int)(timeInMs % 60000);
+                        Log.d("thread", "time to next minute = " + timeToNextMinute);
+                        sleep(timeToNextMinute);
+                    } catch (Exception e) {
+                        Log.e(getPackageName(), "exception = " + e.toString());
+                    }
                 }
             }
         }
