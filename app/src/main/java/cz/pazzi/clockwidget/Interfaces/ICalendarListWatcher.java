@@ -9,4 +9,5 @@ import cz.pazzi.clockwidget.data.GCalendar;
  */
 public interface ICalendarListWatcher {
     void OnCalendarsDownloaded(List<GCalendar> calendars);
+    void OnCalendarsError(String error);
 }

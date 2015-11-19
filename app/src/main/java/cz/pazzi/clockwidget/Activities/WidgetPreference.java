@@ -2,6 +2,7 @@ package cz.pazzi.clockwidget.Activities;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -23,6 +24,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,6 +183,10 @@ public class WidgetPreference extends PreferenceActivity {
 //            addPreferencesFromResource(R.xml.pref_general);
 
             Activity activity = getActivity();
+
+            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
+            setPreferenceScreen(screen);
+
             new CalendarListAsyncTask(activity, this).execute();
         }
 
@@ -195,7 +201,8 @@ public class WidgetPreference extends PreferenceActivity {
 
             Log.d("OnCalendarsDownloaded", "calendar returns " + calendars.size());
 
-            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
+//            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
+            PreferenceScreen screen = getPreferenceScreen();
             PreferenceCategory category = new PreferenceCategory(activity);
             category.setTitle("Calendar settings");
             screen.addPreference(category);
@@ -216,6 +223,22 @@ public class WidgetPreference extends PreferenceActivity {
             }
 
             setPreferenceScreen(screen);
+        }
+
+        @Override
+        public void OnCalendarsError(String error) {
+            Log.d("OnCalendarsDownloaded", "calendar returns error");
+            // TODO: Go back to main settings
+
+//            getFragmentManager().beginTransaction()
+//                    .addToBackStack("settings")
+//                    .commit();
+//            PreferenceScreen screen = getPreferenceScreen();
+//            Dialog dialog = screen.getDialog();
+//            dialog.dismiss();
+
+            PreferenceScreen parentScreen = getPreferenceManager().createPreferenceScreen(getActivity());
+            setPreferenceScreen(parentScreen);
         }
     }
 
