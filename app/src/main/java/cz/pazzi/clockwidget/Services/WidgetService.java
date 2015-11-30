@@ -12,7 +12,7 @@ import android.util.Log;
 import java.util.List;
 
 import cz.pazzi.clockwidget.WidgetProvider1;
-import cz.pazzi.clockwidget.data.EventClass;
+import cz.pazzi.clockwidget.data.GEvent;
 
 /**
  * Created by pavel on 07.10.15.
@@ -21,7 +21,7 @@ public class WidgetService extends Service {
     public static final int UPDATE_CLOCK = 0;
     public static final int UPDATE_CALENDAR = 1;
 
-    private List<EventClass> calEvents = null;
+    private List<GEvent> calEvents = null;
     private long lastCalendarCheck = 0;
     private int intervalCalendarCheck = 1 * 60 * 1000;
 
@@ -33,6 +33,7 @@ public class WidgetService extends Service {
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case WidgetService.UPDATE_CLOCK:
+                    Log.d("WidgetService", "update clock");
                     BroadcastWidgets();
                     break;
             }
@@ -55,14 +56,16 @@ public class WidgetService extends Service {
             synchronized (this) {
                 while (canRun)
                 {
+                    Log.d("thread", "loop");
+
                     long timeInMs = System.currentTimeMillis();
 
                     handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CLOCK));
 
-                    if(lastCalendarCheck + intervalCalendarCheck < timeInMs) {
-                        lastCalendarCheck = timeInMs;
-                        handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CALENDAR));
-                    }
+//                    if(lastCalendarCheck + intervalCalendarCheck < timeInMs) {
+//                        lastCalendarCheck = timeInMs;
+//                        handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CALENDAR));
+//                    }
 
                     try {
                         int timeToNextMinute = 60000 - (int)(timeInMs % 60000);

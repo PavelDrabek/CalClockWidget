@@ -69,7 +69,7 @@ public class GoogleProvider {
     }
 
     private static String GetAccountName(Context context) {
-        SetAccountName(context, null);
+        //SetAccountName(context, null);
 
         Resources resources = context.getResources();
         SharedPreferences settings = context.getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);

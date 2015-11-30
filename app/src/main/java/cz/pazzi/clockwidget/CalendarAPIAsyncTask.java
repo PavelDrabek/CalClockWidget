@@ -8,13 +8,17 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
-import cz.pazzi.clockwidget.data.EventClass;
+import cz.pazzi.clockwidget.data.GEvent;
 
 /**
  * Created by pavel on 02.10.15.
@@ -53,7 +57,7 @@ public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    private List<EventClass> getDataFromApi() throws IOException {
+    private List<GEvent> getDataFromApi() throws IOException {
         // List the next 10 events from the primary calendar.
         java.util.Calendar dateCalendar = java.util.Calendar.getInstance();
         dateCalendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
@@ -66,7 +70,7 @@ public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
         DateTime tomorrow = new DateTime(dateCalendar.getTime());
 
         DateTime now = new DateTime(System.currentTimeMillis());
-        List<EventClass> dataEvents = new ArrayList<EventClass>();
+        List<GEvent> dataEvents = new ArrayList<GEvent>();
 
         String pageToken = null;
         int count = 0;
@@ -94,11 +98,17 @@ public class CalendarAPIAsyncTask extends AsyncTask<Void, Void, Void> {
                         start = event.getStart().getDate();
                     }
 
-                    EventClass nEvent = new EventClass(event.getSummary(), start, event.getEnd().getDateTime());
+
+                    Calendar startEvent = new GregorianCalendar();
+                    Calendar endEvent = new GregorianCalendar();
+                    startEvent.setTime(new Date(start.getValue()));
+                    endEvent.setTime(new Date(event.getEnd().getDate().getValue()));
+
+                    GEvent nEvent = new GEvent(event.getSummary(), startEvent,  endEvent);
 //                    nEvent.name = event.getSummary();
 //                    nEvent.start = start;
 //                    nEvent.end = event.getEnd().getDateTime();
-                    nEvent.SetBackgroundColor(calendarListEntry.getBackgroundColor());
+                    nEvent.SetBackgroundColor(event.getColorId()); // calendarListEntry.getBackgroundColor());
                     nEvent.SetForegroundColor(calendarListEntry.getForegroundColor());
 
                     dataEvents.add(nEvent);

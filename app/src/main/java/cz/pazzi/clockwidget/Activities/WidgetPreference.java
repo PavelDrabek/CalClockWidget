@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -216,6 +217,7 @@ public class WidgetPreference extends PreferenceActivity {
 
                 View view = calPref.getView(null, null);
                 TextView titleView = (TextView)view.findViewById(android.R.id.title);
+                TextView summaryView = (TextView)view.findViewById(android.R.id.summary);
                 titleView.setTextColor(Color.RED);
                 titleView.setBackgroundColor(Color.BLUE);
 
@@ -236,9 +238,6 @@ public class WidgetPreference extends PreferenceActivity {
 //            PreferenceScreen screen = getPreferenceScreen();
 //            Dialog dialog = screen.getDialog();
 //            dialog.dismiss();
-
-            PreferenceScreen parentScreen = getPreferenceManager().createPreferenceScreen(getActivity());
-            setPreferenceScreen(parentScreen);
         }
     }
 
