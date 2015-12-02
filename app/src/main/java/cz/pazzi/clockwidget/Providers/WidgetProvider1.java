@@ -45,6 +45,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
         Log.d("WidgetProvider", "updating");
 
         //TODO: if service not running, start service
+        //TODO: get only widget calendars (WidgetPreference or SharedPreference?)
 
         List<GEvent> events = new ArrayList<>();
         for (int widgetId : appWidgetIds) {
