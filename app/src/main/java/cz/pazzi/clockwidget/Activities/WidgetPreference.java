@@ -109,10 +109,7 @@ public class WidgetPreference extends PreferenceActivity {
                 int index = listPreference.findIndexOfValue(stringValue);
 
                 // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+                preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
 
             } else if (preference instanceof RingtonePreference) {
                 // For ringtone preferences, look up the correct display value
@@ -213,6 +210,8 @@ public class WidgetPreference extends PreferenceActivity {
                 String widgetPrefix = String.valueOf(settings.getInt(resources.getString(R.string.preference_last_configured_widgetId), -3)) + "_";
 
                 Log.d(getClass().getName(), "CalendarPreferenceFragment widgetId = " + widgetPrefix);
+
+                // TODO change text color (and background?)
 
                 for (GCalendar calendar : calendars) {
                     CheckBoxPreference calPref = new CheckBoxPreference(context);
