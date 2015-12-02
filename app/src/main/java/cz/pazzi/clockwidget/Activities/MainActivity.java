@@ -1,4 +1,4 @@
-package cz.pazzi.clockwidget;
+package cz.pazzi.clockwidget.Activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import cz.pazzi.clockwidget.Activities.WidgetPreference;
+import cz.pazzi.clockwidget.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,16 +16,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Button btn = (Button)findViewById(R.id.button);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, GCalActivity.class);
-                startActivity(i);
-            }
-        });
-
 
         Button btnPrefs = (Button)findViewById(R.id.btnPreferences);
         btnPrefs.setOnClickListener(new View.OnClickListener() {
