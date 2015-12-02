@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import cz.pazzi.clockwidget.AsyncTasks.CalendarListAsyncTask;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
+import cz.pazzi.clockwidget.Providers.GoogleProvider;
 import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.data.GCalendar;
 
@@ -183,18 +184,39 @@ public class WidgetPreference extends PreferenceActivity {
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class CalendarPreferenceFragment extends PreferenceFragment implements ICalendarListWatcher {
+    public static class CalendarPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-//            addPreferencesFromResource(R.xml.pref_general);
 
-            Activity activity = getActivity();
+            Context context = getActivity();
+            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
 
-            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
+            PreferenceCategory category = new PreferenceCategory(context);
+            category.setTitle("Calendar settings");
+            screen.addPreference(category);
+
+            List<GCalendar> calendars = GoogleProvider.getInstance().GetCalendars();
+
+            if(calendars != null) {
+                for (GCalendar calendar : calendars) {
+                    CheckBoxPreference calPref = new CheckBoxPreference(context);
+                    calPref.setTitle(calendar.summary);
+                    calPref.setSummary(calendar.id);
+                    calPref.setDefaultValue(true);
+                    calPref.setKey(calendar.id);
+
+                    View view = calPref.getView(null, null);
+                    TextView titleView = (TextView) view.findViewById(android.R.id.title);
+                    TextView summaryView = (TextView) view.findViewById(android.R.id.summary);
+                    titleView.setTextColor(Color.RED);
+                    titleView.setBackgroundColor(Color.BLUE);
+
+                    category.addPreference(calPref);
+                }
+            }
+
             setPreferenceScreen(screen);
-
-            new CalendarListAsyncTask(activity, this).execute();
         }
 
         @Override
@@ -202,49 +224,49 @@ public class WidgetPreference extends PreferenceActivity {
             return super.onCreateView(inflater, container, savedInstanceState);
         }
 
-        @Override
-        public void OnCalendarsDownloaded(List<GCalendar> calendars) {
-            Activity activity = getActivity();
-
-            Log.d("OnCalendarsDownloaded", "calendar returns " + calendars.size());
-
-//            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
-            PreferenceScreen screen = getPreferenceScreen();
-            PreferenceCategory category = new PreferenceCategory(activity);
-            category.setTitle("Calendar settings");
-            screen.addPreference(category);
-
-            for(GCalendar calendar : calendars) {
-                CheckBoxPreference calPref = new CheckBoxPreference(activity);
-                calPref.setTitle(calendar.summary);
-                calPref.setSummary(calendar.id);
-                calPref.setDefaultValue(true);
-                calPref.setKey(calendar.id);
-
-                View view = calPref.getView(null, null);
-                TextView titleView = (TextView)view.findViewById(android.R.id.title);
-                TextView summaryView = (TextView)view.findViewById(android.R.id.summary);
-                titleView.setTextColor(Color.RED);
-                titleView.setBackgroundColor(Color.BLUE);
-
-                category.addPreference(calPref);
-            }
-
-            setPreferenceScreen(screen);
-        }
-
-        @Override
-        public void OnCalendarsError(String error) {
-            Log.d("OnCalendarsDownloaded", "calendar returns error");
-            // TODO: Go back to main settings
-
-//            getFragmentManager().beginTransaction()
-//                    .addToBackStack("settings")
-//                    .commit();
+//        @Override
+//        public void OnCalendarsDownloaded(List<GCalendar> calendars) {
+//            Activity activity = getActivity();
+//
+//            Log.d("OnCalendarsDownloaded", "calendar returns " + calendars.size());
+//
+////            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
 //            PreferenceScreen screen = getPreferenceScreen();
-//            Dialog dialog = screen.getDialog();
-//            dialog.dismiss();
-        }
+//            PreferenceCategory category = new PreferenceCategory(activity);
+//            category.setTitle("Calendar settings");
+//            screen.addPreference(category);
+//
+//            for(GCalendar calendar : calendars) {
+//                CheckBoxPreference calPref = new CheckBoxPreference(activity);
+//                calPref.setTitle(calendar.summary);
+//                calPref.setSummary(calendar.id);
+//                calPref.setDefaultValue(true);
+//                calPref.setKey(calendar.id);
+//
+//                View view = calPref.getView(null, null);
+//                TextView titleView = (TextView)view.findViewById(android.R.id.title);
+//                TextView summaryView = (TextView)view.findViewById(android.R.id.summary);
+//                titleView.setTextColor(Color.RED);
+//                titleView.setBackgroundColor(Color.BLUE);
+//
+//                category.addPreference(calPref);
+//            }
+//
+//            setPreferenceScreen(screen);
+//        }
+//
+//        @Override
+//        public void OnCalendarsError(String error) {
+//            Log.d("OnCalendarsDownloaded", "calendar returns error");
+//            // TODO: Go back to main settings
+//
+////            getFragmentManager().beginTransaction()
+////                    .addToBackStack("settings")
+////                    .commit();
+////            PreferenceScreen screen = getPreferenceScreen();
+////            Dialog dialog = screen.getDialog();
+////            dialog.dismiss();
+//        }
     }
 
     /**
@@ -293,3 +315,4 @@ public class WidgetPreference extends PreferenceActivity {
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName);
     }
 }
+

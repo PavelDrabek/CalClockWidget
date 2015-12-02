@@ -10,13 +10,17 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.List;
+
+import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.Providers.WidgetProvider1;
 import cz.pazzi.clockwidget.Providers.GoogleProvider;
+import cz.pazzi.clockwidget.data.GCalendar;
 
 /**
  * Created by pavel on 07.10.15.
  */
-public class WidgetService extends Service {
+public class WidgetService extends Service implements ICalendarListWatcher {
     public static final int UPDATE_CLOCK = 0;
     public static final int UPDATE_CALENDAR = 1;
 
@@ -40,7 +44,7 @@ public class WidgetService extends Service {
             }
         }
 
-        private void BroadcastWidgets() {
+        public void BroadcastWidgets() {
             Intent intent = new Intent(getApplicationContext(), WidgetProvider1.class);
             int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider1.class));
 
@@ -88,11 +92,12 @@ public class WidgetService extends Service {
         Context context = getBaseContext();
         GoogleProvider gProvider = GoogleProvider.getInstance();
         gProvider.Init(context);
+        gProvider.AddListener(this);
 
-        if(!gProvider.IsAccountSelected()) {
-            gProvider.ShowChooseAccount();
+        if(gProvider.IsAccountSelected()) {
+            gProvider.DownloadCalendars();
         } else {
-            GoogleProvider.getInstance().DownloadCalendars();
+            gProvider.ShowChooseAccount();
         }
 
         clockThread.start();
@@ -108,5 +113,15 @@ public class WidgetService extends Service {
         Log.d("WidgetService", "onDestroy");
         clockThread.interrupt();
         super.onDestroy();
+    }
+
+    @Override
+    public void OnCalendarsDownloaded(List<GCalendar> calendars) {
+        handler.BroadcastWidgets();
+    }
+
+    @Override
+    public void OnCalendarsError(String error) {
+
     }
 }

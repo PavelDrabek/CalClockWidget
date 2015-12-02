@@ -51,7 +51,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
 //            events = GoogleProvider.getInstance().GetEvents(calendarIds);
             events = GoogleProvider.getInstance().GetEvents();
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-            remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPendingSelfIntent(context, widgetId, ONCLICK_CLOCK));
+            remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPreferenceIntent(context, widgetId, ONCLICK_CLOCK));
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
             UpdateTimeLine(context, widgetId, events);
         }
@@ -119,7 +119,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
         AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
     }
 
-    protected PendingIntent getPendingSelfIntent(Context context, int widgetId, String action) {
+    protected PendingIntent getPreferenceIntent(Context context, int widgetId, String action) {
         Intent intent = new Intent(context, WidgetPreference.class);
         intent.setAction(action);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);

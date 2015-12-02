@@ -45,10 +45,12 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
 
     @Override
     protected List<GCalendar> doInBackground(Void... params) {
-        Log.d(getClass().getName(), "doInBackground - start");
+        Log.d(getClass().getName(), "Downloading calendars...");
 
         List<GCalendar> calendars = DownloadCalendars();
         calendars = DownloadEvents(calendars, from, to);
+
+        Log.d(getClass().getName(), "Calendars downloaded");
         return  calendars;
     }
 

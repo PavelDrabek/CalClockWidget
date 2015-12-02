@@ -43,6 +43,7 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     private List<GCalendar> calendars;
     private List<GEvent> events;
+    private List<ICalendarListWatcher> watchers;
 
     private boolean isInit = false;
     public boolean IsInit() { return isInit; }
@@ -60,6 +61,7 @@ public class GoogleProvider implements ICalendarListWatcher {
     private GoogleProvider() {
         instance = this;
         isInit = false;
+        watchers = new ArrayList<>();
     }
 
     public void Init(Context context) {
@@ -130,21 +132,42 @@ public class GoogleProvider implements ICalendarListWatcher {
     }
 
     public void DownloadCalendars() {
-        new DownloadFromCalendar(this).execute();
+        if(IsAccountSelected()) {
+            new DownloadFromCalendar(this).execute();
+        } else {
+            Log.w(getClass().getName(), "Cannot download calendars, because account is not selected!");
+        }
+    }
+
+    public void AddListener(ICalendarListWatcher listener) {
+        watchers.add(listener);
     }
 
     @Override
     public void OnCalendarsDownloaded(List<GCalendar> calendars) {
-        this.events = new ArrayList<>();
-
         this.calendars = calendars;
+
+        if(events == null) {
+            events = new ArrayList<>();
+        } else {
+            events.clear();
+        }
+
         for(GCalendar c : calendars) {
             events.addAll(c.events);
+        }
+
+        for (ICalendarListWatcher w: watchers) {
+            w.OnCalendarsDownloaded(calendars);
         }
     }
 
     @Override
-    public void OnCalendarsError(String error) { }
+    public void OnCalendarsError(String error) {
+        for (ICalendarListWatcher w: watchers) {
+            w.OnCalendarsError(error);
+        }
+    }
 
     private boolean isDeviceOnline() {
         Log.d(getClass().getName(), "isDeviceOnline");
