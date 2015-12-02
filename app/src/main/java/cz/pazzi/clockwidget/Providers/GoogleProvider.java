@@ -62,6 +62,9 @@ public class GoogleProvider implements ICalendarListWatcher {
         instance = this;
         isInit = false;
         watchers = new ArrayList<>();
+
+        calendars = new ArrayList<>();
+        events = new ArrayList<>();
     }
 
     public void Init(Context context) {

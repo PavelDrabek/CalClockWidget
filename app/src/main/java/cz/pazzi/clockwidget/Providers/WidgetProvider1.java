@@ -6,10 +6,12 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -22,6 +24,7 @@ import java.util.List;
 import cz.pazzi.clockwidget.Activities.WidgetPreference;
 import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.Services.WidgetService;
+import cz.pazzi.clockwidget.data.GCalendar;
 import cz.pazzi.clockwidget.data.GEvent;
 
 /**
@@ -49,8 +52,8 @@ public class WidgetProvider1 extends AppWidgetProvider {
 
         List<GEvent> events = new ArrayList<>();
         for (int widgetId : appWidgetIds) {
-//            events = GoogleProvider.getInstance().GetEvents(calendarIds);
-            events = GoogleProvider.getInstance().GetEvents();
+            events = GetEventsForWidget(context, widgetId);
+//            events = GoogleProvider.getInstance().GetEvents();
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPreferenceIntent(context, widgetId, ONCLICK_CLOCK));
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
@@ -70,6 +73,21 @@ public class WidgetProvider1 extends AppWidgetProvider {
             AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
         }
         super.onReceive(context, intent);
+    }
+
+    private List<GEvent> GetEventsForWidget(Context context, int widgetId) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        List<GCalendar> allCals = GoogleProvider.getInstance().GetCalendars();
+        List<GEvent> events = new ArrayList<>();
+
+        String prefix = String.valueOf(widgetId) + "_";
+
+        for (int i = 0; i < allCals.size(); i++) {
+            if (pref.getBoolean(prefix + allCals.get(i).id, false)) {
+                events.addAll(allCals.get(i).events);
+            }
+        }
+        return events;
     }
 
     private String GetTimeString() {
@@ -144,11 +162,11 @@ public class WidgetProvider1 extends AppWidgetProvider {
     void AddEventToBitmap(Bitmap bitmap, GEvent event, float densityPerMinute) {
         int pixelCount = (int)(densityPerMinute * event.DurationInMinutes());
         int pixelOffset = (int)(densityPerMinute * event.StartAtMinutes());
-        Log.d("addEventToBitmap", "event duration = " + event.DurationInMinutes());
-        Log.d("addEventToBitmap", "density per minute = " + densityPerMinute);
-        Log.d("addEventToBitmap", "pixel count = " + pixelCount);
-        Log.d("addEventToBitmap", "pixel offset = " + pixelOffset);
-        Log.d("addEventToBitmap", "event color = " + event.backgroundColor);
+//        Log.d("addEventToBitmap", "event duration = " + event.DurationInMinutes());
+//        Log.d("addEventToBitmap", "density per minute = " + densityPerMinute);
+//        Log.d("addEventToBitmap", "pixel count = " + pixelCount);
+//        Log.d("addEventToBitmap", "pixel offset = " + pixelOffset);
+//        Log.d("addEventToBitmap", "event color = " + event.backgroundColor);
 
         for(int i = pixelOffset; i < pixelOffset + pixelCount && i < bitmap.getWidth(); i++) {
             bitmap.setPixel(i, 0, event.backgroundColor);

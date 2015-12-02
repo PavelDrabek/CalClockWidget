@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.Ringtone;
@@ -54,10 +56,23 @@ import java.util.List;
  */
 public class WidgetPreference extends PreferenceActivity {
 
+    private int widgetId = -2;
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // if account not set, call activityForResult ChooseAccountActivity
+
+        widgetId = getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        Log.d(getClass().getName(), "onPostCreate widgetId = " + widgetId);
+
+        if(widgetId != -1) {
+            Resources resources = getResources();
+            SharedPreferences settings = getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt(resources.getString(R.string.preference_last_configured_widgetId), widgetId);
+            editor.commit();
+        }
     }
 
     /**
@@ -189,6 +204,8 @@ public class WidgetPreference extends PreferenceActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
+            Log.d(getClass().getName(), "CalendarPreferenceFragment OnCreate");
+
             Context context = getActivity();
             PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
 
@@ -199,12 +216,18 @@ public class WidgetPreference extends PreferenceActivity {
             List<GCalendar> calendars = GoogleProvider.getInstance().GetCalendars();
 
             if(calendars != null) {
+                Resources resources = context.getResources();
+                SharedPreferences settings = context.getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                String widgetPrefix = String.valueOf(settings.getInt(resources.getString(R.string.preference_last_configured_widgetId), -3)) + "_";
+
+                Log.d(getClass().getName(), "CalendarPreferenceFragment widgetId = " + widgetPrefix);
+
                 for (GCalendar calendar : calendars) {
                     CheckBoxPreference calPref = new CheckBoxPreference(context);
                     calPref.setTitle(calendar.summary);
                     calPref.setSummary(calendar.id);
                     calPref.setDefaultValue(true);
-                    calPref.setKey(calendar.id);
+                    calPref.setKey(widgetPrefix + calendar.id);
 
                     View view = calPref.getView(null, null);
                     TextView titleView = (TextView) view.findViewById(android.R.id.title);
@@ -223,50 +246,6 @@ public class WidgetPreference extends PreferenceActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             return super.onCreateView(inflater, container, savedInstanceState);
         }
-
-//        @Override
-//        public void OnCalendarsDownloaded(List<GCalendar> calendars) {
-//            Activity activity = getActivity();
-//
-//            Log.d("OnCalendarsDownloaded", "calendar returns " + calendars.size());
-//
-////            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(activity);
-//            PreferenceScreen screen = getPreferenceScreen();
-//            PreferenceCategory category = new PreferenceCategory(activity);
-//            category.setTitle("Calendar settings");
-//            screen.addPreference(category);
-//
-//            for(GCalendar calendar : calendars) {
-//                CheckBoxPreference calPref = new CheckBoxPreference(activity);
-//                calPref.setTitle(calendar.summary);
-//                calPref.setSummary(calendar.id);
-//                calPref.setDefaultValue(true);
-//                calPref.setKey(calendar.id);
-//
-//                View view = calPref.getView(null, null);
-//                TextView titleView = (TextView)view.findViewById(android.R.id.title);
-//                TextView summaryView = (TextView)view.findViewById(android.R.id.summary);
-//                titleView.setTextColor(Color.RED);
-//                titleView.setBackgroundColor(Color.BLUE);
-//
-//                category.addPreference(calPref);
-//            }
-//
-//            setPreferenceScreen(screen);
-//        }
-//
-//        @Override
-//        public void OnCalendarsError(String error) {
-//            Log.d("OnCalendarsDownloaded", "calendar returns error");
-//            // TODO: Go back to main settings
-//
-////            getFragmentManager().beginTransaction()
-////                    .addToBackStack("settings")
-////                    .commit();
-////            PreferenceScreen screen = getPreferenceScreen();
-////            Dialog dialog = screen.getDialog();
-////            dialog.dismiss();
-//        }
     }
 
     /**
