@@ -29,6 +29,8 @@ public class WidgetService extends Service implements ICalendarListWatcher {
 
     private MyHandler handler = new MyHandler();
 
+    // TODO: Service jako singleton?
+
     private class MyHandler extends Handler {
 
         @Override

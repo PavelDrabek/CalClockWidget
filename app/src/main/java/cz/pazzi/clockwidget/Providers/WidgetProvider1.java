@@ -83,7 +83,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
         String prefix = String.valueOf(widgetId) + "_";
 
         for (int i = 0; i < allCals.size(); i++) {
-            if (pref.getBoolean(prefix + allCals.get(i).id, false)) {
+            if (pref.getBoolean(prefix + allCals.get(i).id, true)) {
                 events.addAll(allCals.get(i).events);
             }
         }
