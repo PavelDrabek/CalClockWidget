@@ -53,6 +53,12 @@ import java.util.List;
  */
 public class WidgetPreference extends PreferenceActivity {
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // if account not set, call activityForResult ChooseAccountActivity
+    }
+
     /**
      * {@inheritDoc}
      */

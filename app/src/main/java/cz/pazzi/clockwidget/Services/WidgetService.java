@@ -3,16 +3,15 @@ package cz.pazzi.clockwidget.Services;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
-import java.util.List;
-
-import cz.pazzi.clockwidget.WidgetProvider1;
-import cz.pazzi.clockwidget.data.GEvent;
+import cz.pazzi.clockwidget.Providers.WidgetProvider1;
+import cz.pazzi.clockwidget.Providers.GoogleProvider;
 
 /**
  * Created by pavel on 07.10.15.
@@ -21,7 +20,6 @@ public class WidgetService extends Service {
     public static final int UPDATE_CLOCK = 0;
     public static final int UPDATE_CALENDAR = 1;
 
-    private List<GEvent> calEvents = null;
     private long lastCalendarCheck = 0;
     private int intervalCalendarCheck = 1 * 60 * 1000;
 
@@ -35,6 +33,9 @@ public class WidgetService extends Service {
                 case WidgetService.UPDATE_CLOCK:
                     Log.d("WidgetService", "update clock");
                     BroadcastWidgets();
+                    break;
+                case WidgetService.UPDATE_CALENDAR:
+                    GoogleProvider.getInstance().DownloadCalendars();
                     break;
             }
         }
@@ -62,10 +63,10 @@ public class WidgetService extends Service {
 
                     handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CLOCK));
 
-//                    if(lastCalendarCheck + intervalCalendarCheck < timeInMs) {
-//                        lastCalendarCheck = timeInMs;
-//                        handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CALENDAR));
-//                    }
+                    if(lastCalendarCheck + intervalCalendarCheck < timeInMs) {
+                        lastCalendarCheck = timeInMs;
+                        handler.sendMessage(handler.obtainMessage(WidgetService.UPDATE_CALENDAR));
+                    }
 
                     try {
                         int timeToNextMinute = 60000 - (int)(timeInMs % 60000);
@@ -79,11 +80,20 @@ public class WidgetService extends Service {
         }
     };
 
-
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("WidgetService", "onCreate");
+
+        Context context = getBaseContext();
+        GoogleProvider gProvider = GoogleProvider.getInstance();
+        gProvider.Init(context);
+
+        if(!gProvider.IsAccountSelected()) {
+            gProvider.ShowChooseAccount();
+        } else {
+            GoogleProvider.getInstance().DownloadCalendars();
+        }
 
         clockThread.start();
     }

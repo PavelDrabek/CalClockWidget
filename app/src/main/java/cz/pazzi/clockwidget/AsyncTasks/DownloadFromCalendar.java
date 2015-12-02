@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 
@@ -14,20 +16,20 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import cz.pazzi.clockwidget.Interfaces.IEventListWatcher;
-import cz.pazzi.clockwidget.data.GEvent;
+import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.data.GCalendar;
+import cz.pazzi.clockwidget.data.GEvent;
 import cz.pazzi.clockwidget.Providers.GoogleProvider;
 
 /**
- * Created by pavel on 04.11.15.
+ * Created by pavel on 02.12.15.
  */
-public class EventListAsyncTask extends AsyncTask<Void, Void, List<GEvent>> {
-    IEventListWatcher watcher;
+public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>> {
+    ICalendarListWatcher watcher;
     DateTime from;
     DateTime to;
 
-    public EventListAsyncTask(IEventListWatcher watcher) {
+    public DownloadFromCalendar(ICalendarListWatcher watcher) {
         this.watcher = watcher;
 
         java.util.Calendar dateCalendar = java.util.Calendar.getInstance();
@@ -42,31 +44,53 @@ public class EventListAsyncTask extends AsyncTask<Void, Void, List<GEvent>> {
     }
 
     @Override
-    protected List<GEvent> doInBackground(Void... params) {
-        Log.d("asyncEvents", "doInBackground - start");
-        return DownloadEvents(from, to);
+    protected List<GCalendar> doInBackground(Void... params) {
+        Log.d(getClass().getName(), "doInBackground - start");
+
+        List<GCalendar> calendars = DownloadCalendars();
+        calendars = DownloadEvents(calendars, from, to);
+        return  calendars;
     }
 
     @Override
-    protected void onPostExecute(List<GEvent> result) {
+    protected void onPostExecute(List<GCalendar> result) {
         if(result != null) {
-            watcher.OnEventsDownloaded(result);
+            watcher.OnCalendarsDownloaded(result);
         } else {
-            watcher.OnEventsError("event list is empty");
+            watcher.OnCalendarsError("event list is empty");
         }
     }
 
-    public static List<GEvent> DownloadEvents(DateTime from, DateTime to) {
-        com.google.api.services.calendar.Calendar mService = GoogleProvider.getInstance().GetServiceCalendar();
-        List<GCalendar> calendars = CalendarListAsyncTask.DownloadCalendars();;
-        Log.d("asyncEvents", "doInBackground - 2");
-        Log.d("asyncEvents", "doInBackground - calendars count " + calendars.size());
+    public static List<GCalendar> DownloadCalendars() {
+        GoogleProvider gProvider =  GoogleProvider.getInstance();
+        List<GCalendar> calendars = new ArrayList<>();
+        String pageToken = null;
 
-        List<GEvent> eventList = new ArrayList<>();
+        com.google.api.services.calendar.Calendar calendarService = gProvider.GetServiceCalendar();
+
+        do {
+            try {
+                CalendarList calendarList = calendarService.calendarList().list().setPageToken(pageToken).execute();
+                List<CalendarListEntry> calItems = calendarList.getItems();
+
+                for (CalendarListEntry entry : calItems) {
+                    calendars.add( new GCalendar(entry.getId(), entry.getSummary(), entry.getBackgroundColor(), entry.getForegroundColor() ));
+                }
+                pageToken = calendarList.getNextPageToken();
+            } catch (IOException e) { }
+        } while (pageToken != null);
+
+        return calendars;
+    }
+
+    public static List<GCalendar> DownloadEvents(List<GCalendar> calendars, DateTime from, DateTime to) {
+        com.google.api.services.calendar.Calendar mService = GoogleProvider.getInstance().GetServiceCalendar();
+
+//        List<GEvent> eventList = new ArrayList<>();
         for (GCalendar calEntry : calendars) {
             try {
                 Events events = mService.events().list(calEntry.id)
-                        .setMaxResults(10)
+                        .setMaxResults(30)
                         .setTimeMin(from)
                         .setTimeMax(to)
                         .setOrderBy("startTime")
@@ -75,12 +99,13 @@ public class EventListAsyncTask extends AsyncTask<Void, Void, List<GEvent>> {
                 List<Event> items = events.getItems();
 
                 for (Event event : items) {
-                    eventList.add(newGEvent(event, calEntry));
+//                    eventList.add(newGEvent(event, calEntry));
+                    calEntry.events.add(newGEvent(event, calEntry));
                 }
             } catch (IOException e) { }
         }
 
-        return eventList;
+        return calendars;
     }
 
     private static GEvent newGEvent(Event event, GCalendar calendar) {

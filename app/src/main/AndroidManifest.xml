@@ -26,7 +26,7 @@
         <service android:name=".Services.WidgetService" />
 
         <receiver
-            android:name=".WidgetProvider1"
+            android:name=".Providers.WidgetProvider1"
             android:label="My Widget" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -42,10 +42,6 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".GCalActivity"
-            android:label="@string/title_activity_gcal" >
-        </activity>
-        <activity
             android:name=".Activities.Settings"
             android:label="@string/title_activity_settings" >
         </activity>
@@ -56,6 +52,10 @@
         <activity
             android:name=".Activities.GoogleProviderActivity"
             android:label="@string/title_activity_google_provider" >
+        </activity>
+        <activity
+            android:name=".Activities.ChooseAccountActivity"
+            android:label="@string/title_activity_choose_account" >
         </activity>
     </application>
 

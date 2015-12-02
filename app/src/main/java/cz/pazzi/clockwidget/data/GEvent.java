@@ -3,8 +3,6 @@ package cz.pazzi.clockwidget.data;
 
 import android.graphics.Color;
 
-import com.google.api.client.util.DateTime;
-
 import java.util.Calendar;
 
 /**
@@ -39,6 +37,7 @@ public class GEvent {
     }
 
     public int StartAtMinutes() {
-        return start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE);
+//        Log.d("aaa", "hours = " + start.get(Calendar.HOUR_OF_DAY) + ", minutes = " + start.get(Calendar.MINUTE));
+        return (start.get(Calendar.HOUR_OF_DAY) - 1) * 60 + start.get(Calendar.MINUTE);
     }
 }

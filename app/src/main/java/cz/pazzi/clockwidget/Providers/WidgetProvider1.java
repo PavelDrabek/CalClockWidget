@@ -1,4 +1,4 @@
-package cz.pazzi.clockwidget;
+package cz.pazzi.clockwidget.Providers;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -12,32 +12,24 @@ import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.GridView;
 import android.widget.RemoteViews;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 import cz.pazzi.clockwidget.Activities.WidgetPreference;
-import cz.pazzi.clockwidget.AsyncTasks.EventListAsyncTask;
-import cz.pazzi.clockwidget.Interfaces.IEventListWatcher;
+import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.Services.WidgetService;
 import cz.pazzi.clockwidget.data.GEvent;
 
 /**
  * Created by Pazzi on 16.9.2015.
  */
-public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatcher {
-
-    private GridView gridView;
+public class WidgetProvider1 extends AppWidgetProvider {
 
     private static final String ONCLICK_CLOCK = "clickOnClock";
-
-    public WidgetProvider1() {
-        super();
-    }
 
     @Override
     public void onEnabled(Context context) {
@@ -51,19 +43,18 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d("WidgetProvider", "updating");
-//        Toast.makeText(context, "onUpdate clock " + Arrays.toString(appWidgetIds), Toast.LENGTH_SHORT).show();
 
-//        List<GEvent> events = new ArrayList<GEvent>();
-//        events.add(new GEvent("test", new DateTime(1241000), new DateTime(1241521)));
-//        events.add(new GEvent("test2", new DateTime(1241000), new DateTime(1241521)));
+        //TODO: if service not running, start service
 
+        List<GEvent> events = new ArrayList<>();
         for (int widgetId : appWidgetIds) {
+//            events = GoogleProvider.getInstance().GetEvents(calendarIds);
+            events = GoogleProvider.getInstance().GetEvents();
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-//            Toast.makeText(context, "onUpdate widget id is: " + widgetId, Toast.LENGTH_SHORT).show();
             remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPendingSelfIntent(context, widgetId, ONCLICK_CLOCK));
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
+            UpdateTimeLine(context, widgetId, events);
         }
-        new EventListAsyncTask(context, this, appWidgetIds).execute();
 
         UpdateClock(context);
     }
@@ -73,12 +64,8 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
         Log.d("WidgetProvider", "onReceive: " + intent.getAction());
 
         if(ONCLICK_CLOCK.equals(intent.getAction())) {
-            int rnd = new Random().nextInt(100);
             int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-//            Toast.makeText(context, "onclick clock " + widgetId + " " + rnd, Toast.LENGTH_SHORT).show();
-
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-//            remoteViews.setTextViewText(R.id.txtRandom, String.valueOf(rnd));
             AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
         }
         super.onReceive(context, intent);
@@ -97,8 +84,6 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
 //        SimpleDateFormat date = new SimpleDateFormat("EEE, MMMM d", Locale.getDefault());
         String myString = DateFormat.getDateInstance(DateFormat.LONG).format(cal.getTime());
         return myString;
-
-//        return date.format(cal.getTime());
     }
 
     private void UpdateClock(Context context) {
@@ -124,27 +109,20 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
         float yScale = ((float) boundingY) / height;
         Matrix matrix = new Matrix();
         matrix.postScale(xScale, yScale);
-
-
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix , false);
-
 
         BitmapDrawable bd = new BitmapDrawable(context.getResources(), scaledBitmap);
         bd.setAntiAlias(false);
 
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         remoteViews.setImageViewBitmap(R.id.imgTimeline, bd.getBitmap());
-
         AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
     }
 
     protected PendingIntent getPendingSelfIntent(Context context, int widgetId, String action) {
         Intent intent = new Intent(context, WidgetPreference.class);
-//        Intent intent = new Intent(context, WidgetProvider1.class);
         intent.setAction(action);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-//        Log.d("WidgetProvider", "setting intent id = " + widgetId);
-//        return PendingIntent.getBroadcast(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return PendingIntent.getActivity(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -154,8 +132,10 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
         bitmap.eraseColor(Color.TRANSPARENT);
 
         float density = bitmapSize / (float)(24 * 60);
-        for(GEvent e : events) {
-            AddEventToBitmap(bitmap, e, density);
+        if(events != null) {
+            for (GEvent e : events) {
+                AddEventToBitmap(bitmap, e, density);
+            }
         }
         return bitmap;
     }
@@ -169,22 +149,8 @@ public class WidgetProvider1 extends AppWidgetProvider implements IEventListWatc
         Log.d("addEventToBitmap", "pixel offset = " + pixelOffset);
         Log.d("addEventToBitmap", "event color = " + event.backgroundColor);
 
-        for(int i = 0; i < pixelCount; i++) {
-            bitmap.setPixel(pixelOffset + i, 0, event.backgroundColor);
-//            bitmap.setPixel(i, 0, Color.BLUE);
+        for(int i = pixelOffset; i < pixelOffset + pixelCount && i < bitmap.getWidth(); i++) {
+            bitmap.setPixel(i, 0, event.backgroundColor);
         }
-    }
-
-    @Override
-    public void OnEventsDownloaded(List<GEvent> events, Context context, int[] widgetIds) {
-        for (int widgetId : widgetIds) {
-            UpdateTimeLine(context, widgetId, events);
-        }
-        Log.d("asyncEvents", "onDownloaded - event count = " + events.size());
-    }
-
-    @Override
-    public void OnEventsError(String error) {
-
     }
 }
