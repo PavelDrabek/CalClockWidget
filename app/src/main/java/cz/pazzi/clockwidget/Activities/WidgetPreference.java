@@ -1,22 +1,17 @@
 package cz.pazzi.clockwidget.Activities;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -27,15 +22,12 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
-import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import cz.pazzi.clockwidget.AsyncTasks.CalendarListAsyncTask;
-import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.Providers.GoogleProvider;
 import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.data.GCalendar;
