@@ -69,6 +69,8 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
         }
     }
 
+    //TODO: after 5 minutes get error: "java.net.ConnectException: failed to connect to www.googleapis.com/216.58.213.10 (port 443) after 20000ms: isConnected failed: ECONNREFUSED (Connection refused)"
+
     public static List<GCalendar> DownloadCalendars() {
         GoogleProvider gProvider =  GoogleProvider.getInstance();
         List<GCalendar> calendars = new ArrayList<>();
