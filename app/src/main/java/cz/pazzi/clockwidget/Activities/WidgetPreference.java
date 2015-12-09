@@ -66,6 +66,8 @@ public class WidgetPreference extends PreferenceActivity {
             SharedPreferences.Editor editor = settings.edit();
             editor.putInt(resources.getString(R.string.preference_last_configured_widgetId), widgetId);
             editor.commit();
+        } else {
+            GoogleProvider.getInstance().UpdateWidgets();
         }
     }
 
@@ -209,7 +211,8 @@ public class WidgetPreference extends PreferenceActivity {
             if(calendars != null) {
                 Resources resources = context.getResources();
                 SharedPreferences settings = context.getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                String widgetPrefix = String.valueOf(settings.getInt(resources.getString(R.string.preference_last_configured_widgetId), -3)) + "_";
+                final int widgetId = settings.getInt(resources.getString(R.string.preference_last_configured_widgetId), -3);
+                String widgetPrefix = String.valueOf(widgetId) + "_";
 
                 Log.d(getClass().getName(), "CalendarPreferenceFragment widgetId = " + widgetPrefix);
 
@@ -221,6 +224,14 @@ public class WidgetPreference extends PreferenceActivity {
                     calPref.setSummary(calendar.id);
                     calPref.setDefaultValue(true);
                     calPref.setKey(widgetPrefix + calendar.id);
+
+                    calPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        @Override
+                        public boolean onPreferenceChange(Preference preference, Object newValue) {
+                            GoogleProvider.getInstance().UpdateWidget(widgetId);
+                            return true;
+                        }
+                    });
 
                     View view = calPref.getView(null, null);
                     TextView titleView = (TextView) view.findViewById(android.R.id.title);

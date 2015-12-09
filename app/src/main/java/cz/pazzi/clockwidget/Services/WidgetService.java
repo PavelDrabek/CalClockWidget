@@ -17,6 +17,7 @@ import java.util.List;
 
 import cz.pazzi.clockwidget.Activities.MainActivity;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
+import cz.pazzi.clockwidget.Interfaces.IWidgetUpdater;
 import cz.pazzi.clockwidget.Providers.WidgetProvider1;
 import cz.pazzi.clockwidget.Providers.GoogleProvider;
 import cz.pazzi.clockwidget.R;
@@ -25,7 +26,7 @@ import cz.pazzi.clockwidget.data.GCalendar;
 /**
  * Created by pavel on 07.10.15.
  */
-public class WidgetService extends Service implements ICalendarListWatcher {
+public class WidgetService extends Service implements ICalendarListWatcher, IWidgetUpdater {
     public static final int UPDATE_CLOCK = 0;
     public static final int UPDATE_CALENDAR = 1;
 
@@ -58,6 +59,15 @@ public class WidgetService extends Service implements ICalendarListWatcher {
         public void BroadcastWidgets() {
             Intent intent = new Intent(getApplicationContext(), WidgetProvider1.class);
             int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider1.class));
+
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+            sendBroadcast(intent);
+        }
+
+        public void UpdateWidget(int widgetId) {
+            Intent intent = new Intent(getApplicationContext(), WidgetProvider1.class);
+            int[] ids = { widgetId }; //AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider1.class));
 
             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
@@ -106,6 +116,7 @@ public class WidgetService extends Service implements ICalendarListWatcher {
         GoogleProvider gProvider = GoogleProvider.getInstance();
         gProvider.Init(context);
         gProvider.AddListener(this);
+        gProvider.SetWidgetUpdater(this);
 
         if(gProvider.IsAccountSelected()) {
             gProvider.DownloadCalendars();
@@ -151,6 +162,16 @@ public class WidgetService extends Service implements ICalendarListWatcher {
     @Override
     public void OnCalendarsError(String error) {
 
+    }
+
+    @Override
+    public void ForceUpdate(int widgetId) {
+        handler.UpdateWidget(widgetId);
+    }
+
+    @Override
+    public void ForceUpdateAll() {
+        handler.BroadcastWidgets();
     }
 
     public static void StartService(Context context) {

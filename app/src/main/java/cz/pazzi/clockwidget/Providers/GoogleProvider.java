@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Debug;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -24,6 +25,7 @@ import java.util.List;
 import cz.pazzi.clockwidget.Activities.ChooseAccountActivity;
 import cz.pazzi.clockwidget.AsyncTasks.DownloadFromCalendar;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
+import cz.pazzi.clockwidget.Interfaces.IWidgetUpdater;
 import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.Services.WidgetService;
 import cz.pazzi.clockwidget.data.GCalendar;
@@ -45,6 +47,7 @@ public class GoogleProvider implements ICalendarListWatcher {
     private List<GCalendar> calendars;
     private List<GEvent> events;
     private List<ICalendarListWatcher> watchers;
+    private IWidgetUpdater widgetUpdater;
 
     private boolean isInit = false;
     public boolean IsInit() { return isInit; }
@@ -155,6 +158,20 @@ public class GoogleProvider implements ICalendarListWatcher {
         } else {
             Log.w(getClass().getName(), "Cannot download calendars, because account is not selected!");
         }
+    }
+
+    public void SetWidgetUpdater(IWidgetUpdater updater) {
+        this.widgetUpdater = updater;
+    }
+
+    public void UpdateWidget(int widgetId) {
+        Log.d("GoogleProvider", "Update widget " + widgetId);
+        widgetUpdater.ForceUpdate(widgetId);
+    }
+
+    public void UpdateWidgets() {
+        Log.d("GoogleProvider", "Update widgets");
+        widgetUpdater.ForceUpdateAll();
     }
 
     public void AddListener(ICalendarListWatcher listener) {

@@ -8,9 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
@@ -52,8 +49,6 @@ public class WidgetProvider1 extends AppWidgetProvider {
         Log.d("WidgetProvider", "updating");
 
         //TODO: if service not running, start service
-        //TODO: click on clock opens clock
-        //TODO: clock on timeline opens google calendar
         //TODO: bitmap downloading...
         //TODO: bitmap no events today
 
@@ -136,24 +131,14 @@ public class WidgetProvider1 extends AppWidgetProvider {
 
     private void UpdateTimeLine(Context context, int widgetId, List<GEvent> events) {
 
-        Bitmap bitmap = GetTimelineBitmap(events);
-
         DisplayMetrics metrics = context.getApplicationContext().getResources().getDisplayMetrics();
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        int boundingX = Math.round(480 * metrics.density);
-        int boundingY = Math.round(40f * metrics.density);
-        float xScale = ((float) boundingX) / width;
-        float yScale = ((float) boundingY) / height;
-        Matrix matrix = new Matrix();
-        matrix.postScale(xScale, yScale);
-        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix , false);
 
-        BitmapDrawable bd = new BitmapDrawable(context.getResources(), scaledBitmap);
-        bd.setAntiAlias(false);
+        Bitmap bitmap = BitmapOperations.GetTimelineBitmap(events);
+        Bitmap scaledBitmap = BitmapOperations.ScaleBitmap(bitmap, metrics, 480, 40);
+        scaledBitmap = BitmapOperations.DrawActualTime(scaledBitmap);
 
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-        remoteViews.setImageViewBitmap(R.id.imgTimeline, bd.getBitmap());
+        remoteViews.setImageViewBitmap(R.id.imgTimeline, scaledBitmap);
         AppWidgetManager.getInstance(context).updateAppWidget(widgetId, remoteViews);
     }
 
@@ -176,33 +161,5 @@ public class WidgetProvider1 extends AppWidgetProvider {
 //        ContentUris.appendId(builder, 0);
         Intent intent = new Intent(Intent.ACTION_VIEW).setData(builder.build());
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-    }
-
-    Bitmap GetTimelineBitmap(List<GEvent> events) {
-        int bitmapSize = 240;
-        Bitmap bitmap = Bitmap.createBitmap(bitmapSize, 1, Bitmap.Config.ARGB_8888);
-        bitmap.eraseColor(Color.TRANSPARENT);
-
-        float density = bitmapSize / (float)(24 * 60);
-        if(events != null) {
-            for (GEvent e : events) {
-                AddEventToBitmap(bitmap, e, density);
-            }
-        }
-        return bitmap;
-    }
-
-    void AddEventToBitmap(Bitmap bitmap, GEvent event, float densityPerMinute) {
-        int pixelCount = (int)(densityPerMinute * event.DurationInMinutes());
-        int pixelOffset = (int)(densityPerMinute * event.StartAtMinutes());
-//        Log.d("addEventToBitmap", "event duration = " + event.DurationInMinutes());
-//        Log.d("addEventToBitmap", "density per minute = " + densityPerMinute);
-//        Log.d("addEventToBitmap", "pixel count = " + pixelCount);
-//        Log.d("addEventToBitmap", "pixel offset = " + pixelOffset);
-//        Log.d("addEventToBitmap", "event color = " + event.backgroundColor);
-
-        for(int i = pixelOffset; i < pixelOffset + pixelCount && i < bitmap.getWidth(); i++) {
-            bitmap.setPixel(i, 0, event.backgroundColor);
-        }
     }
 }
