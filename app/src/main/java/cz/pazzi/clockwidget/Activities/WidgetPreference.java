@@ -50,6 +50,8 @@ public class WidgetPreference extends PreferenceActivity {
 
     private int widgetId = -2;
 
+    //TODO: Change account option
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
