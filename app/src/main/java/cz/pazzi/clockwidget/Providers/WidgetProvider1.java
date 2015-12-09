@@ -11,10 +11,14 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.AlarmClock;
+import android.provider.CalendarContract;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -39,7 +43,7 @@ public class WidgetProvider1 extends AppWidgetProvider {
         super.onEnabled(context);
         Log.d("WidgetProvider", "onEnabled");
 
-        context.startService(new Intent(context, WidgetService.class));
+        WidgetService.StartService(context);
     }
 
     @Override
@@ -48,14 +52,22 @@ public class WidgetProvider1 extends AppWidgetProvider {
         Log.d("WidgetProvider", "updating");
 
         //TODO: if service not running, start service
-        //TODO: get only widget calendars (WidgetPreference or SharedPreference?)
+        //TODO: click on clock opens clock
+        //TODO: clock on timeline opens google calendar
+        //TODO: bitmap downloading...
+        //TODO: bitmap no events today
 
-        List<GEvent> events = new ArrayList<>();
+        if(WidgetService.instance == null) {
+            Toast.makeText(context, "service is not running", Toast.LENGTH_SHORT).show();
+        }
+
+        List<GEvent> events = null;
         for (int widgetId : appWidgetIds) {
             events = GetEventsForWidget(context, widgetId);
-//            events = GoogleProvider.getInstance().GetEvents();
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPreferenceIntent(context, widgetId, ONCLICK_CLOCK));
+            remoteViews.setOnClickPendingIntent(R.id.part_clock, getClockIntent(context, widgetId, ONCLICK_CLOCK));
+            remoteViews.setOnClickPendingIntent(R.id.part_timeline, getCalendarIntent(context, widgetId, ONCLICK_CLOCK));
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
             UpdateTimeLine(context, widgetId, events);
         }
@@ -85,6 +97,13 @@ public class WidgetProvider1 extends AppWidgetProvider {
         for (int i = 0; i < allCals.size(); i++) {
             if (pref.getBoolean(prefix + allCals.get(i).id, true)) {
                 events.addAll(allCals.get(i).events);
+            }
+        }
+
+        if(events.size() <= 0) {
+            Log.w(getClass().getName(), "event list for widget " + widgetId + " is empty");
+            if(allCals.size() <= 0) {
+                Log.w(getClass().getName(), "calendar list for widget " + widgetId + " is empty");
             }
         }
         return events;
@@ -143,6 +162,20 @@ public class WidgetProvider1 extends AppWidgetProvider {
         intent.setAction(action);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         return PendingIntent.getActivity(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    protected PendingIntent getClockIntent(Context context, int widgetId, String action) {
+        Intent openClockIntent = new Intent(AlarmClock.ACTION_SHOW_ALARMS);
+        openClockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return PendingIntent.getActivity(context, 0, openClockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    protected PendingIntent getCalendarIntent(Context context, int widgetId, String action) {
+        Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+        builder.appendPath("time");
+//        ContentUris.appendId(builder, 0);
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(builder.build());
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     Bitmap GetTimelineBitmap(List<GEvent> events) {

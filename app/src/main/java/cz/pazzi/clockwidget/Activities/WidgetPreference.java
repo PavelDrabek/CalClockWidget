@@ -56,7 +56,7 @@ public class WidgetPreference extends PreferenceActivity {
         // if account not set, call activityForResult ChooseAccountActivity
 
         widgetId = getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-        Log.d(getClass().getName(), "onPostCreate widgetId = " + widgetId);
+//        Log.d(getClass().getName(), "onPostCreate widgetId = " + widgetId);
 
         if(widgetId != -1) {
             Resources resources = getResources();

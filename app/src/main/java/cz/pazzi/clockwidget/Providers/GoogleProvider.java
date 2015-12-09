@@ -25,6 +25,7 @@ import cz.pazzi.clockwidget.Activities.ChooseAccountActivity;
 import cz.pazzi.clockwidget.AsyncTasks.DownloadFromCalendar;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.R;
+import cz.pazzi.clockwidget.Services.WidgetService;
 import cz.pazzi.clockwidget.data.GCalendar;
 import cz.pazzi.clockwidget.data.GEvent;
 
@@ -113,6 +114,9 @@ public class GoogleProvider implements ICalendarListWatcher {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(resources.getString(R.string.preference_account_name), accountName);
         editor.commit();
+
+        mCredential.setSelectedAccountName(accountName);
+        DownloadCalendars();
     }
 
     private String GetAccountName() {
@@ -123,6 +127,16 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     public Calendar GetServiceCalendar() {
         return mService;
+
+//        mCredential = GoogleAccountCredential.usingOAuth2(
+//                context, Arrays.asList(SCOPES))
+//                .setBackOff(new ExponentialBackOff())
+//                .setSelectedAccountName(GetAccountName());
+//
+//        return new com.google.api.services.calendar.Calendar.Builder(
+//                AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), mCredential)
+//                .setApplicationName("Google Calendar API Android Quickstart")
+//                .build();
     }
 
     public Intent NewChooseAccountIntent() {
@@ -131,6 +145,7 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     public void ShowChooseAccount() {
         Intent intent = new Intent(context, ChooseAccountActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 

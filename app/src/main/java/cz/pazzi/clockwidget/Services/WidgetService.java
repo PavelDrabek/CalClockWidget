@@ -1,5 +1,7 @@
 package cz.pazzi.clockwidget.Services;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -8,13 +10,16 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.List;
 
+import cz.pazzi.clockwidget.Activities.MainActivity;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.Providers.WidgetProvider1;
 import cz.pazzi.clockwidget.Providers.GoogleProvider;
+import cz.pazzi.clockwidget.R;
 import cz.pazzi.clockwidget.data.GCalendar;
 
 /**
@@ -23,6 +28,9 @@ import cz.pazzi.clockwidget.data.GCalendar;
 public class WidgetService extends Service implements ICalendarListWatcher {
     public static final int UPDATE_CLOCK = 0;
     public static final int UPDATE_CALENDAR = 1;
+
+    public static WidgetService instance = null;
+
 
     private long lastCalendarCheck = 0;
     private int intervalCalendarCheck = 1 * 60 * 1000;
@@ -41,6 +49,7 @@ public class WidgetService extends Service implements ICalendarListWatcher {
                     BroadcastWidgets();
                     break;
                 case WidgetService.UPDATE_CALENDAR:
+                    Log.d("WidgetService", "update calendar");
                     GoogleProvider.getInstance().DownloadCalendars();
                     break;
             }
@@ -63,7 +72,7 @@ public class WidgetService extends Service implements ICalendarListWatcher {
             synchronized (this) {
                 while (canRun)
                 {
-                    Log.d("thread", "loop");
+//                    Log.d("thread", "loop");
 
                     long timeInMs = System.currentTimeMillis();
 
@@ -91,6 +100,8 @@ public class WidgetService extends Service implements ICalendarListWatcher {
         super.onCreate();
         Log.d("WidgetService", "onCreate");
 
+        instance = this;
+
         Context context = getBaseContext();
         GoogleProvider gProvider = GoogleProvider.getInstance();
         gProvider.Init(context);
@@ -103,6 +114,21 @@ public class WidgetService extends Service implements ICalendarListWatcher {
         }
 
         clockThread.start();
+
+//        runAsForeground();
+    }
+
+    private void runAsForeground(){
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.widget_preview)
+                .setContentText("content text notification")
+                .setContentIntent(pendingIntent).build();
+
+        startForeground(1, notification);
     }
 
     @Override
@@ -125,5 +151,9 @@ public class WidgetService extends Service implements ICalendarListWatcher {
     @Override
     public void OnCalendarsError(String error) {
 
+    }
+
+    public static void StartService(Context context) {
+        context.startService(new Intent(context, WidgetService.class));
     }
 }

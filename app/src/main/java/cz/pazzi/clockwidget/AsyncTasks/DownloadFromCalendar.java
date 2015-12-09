@@ -45,12 +45,18 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
 
     @Override
     protected List<GCalendar> doInBackground(Void... params) {
-        Log.d(getClass().getName(), "Downloading calendars...");
+        Log.d(getClass().getName(), "Downloading events...");
 
         List<GCalendar> calendars = DownloadCalendars();
+        Log.d(getClass().getName(), "Calendars downloaded " + calendars.size());
         calendars = DownloadEvents(calendars, from, to);
 
-        Log.d(getClass().getName(), "Calendars downloaded");
+        int eventCount = 0;
+        for (GCalendar c: calendars) {
+            eventCount += c.events.size();
+        }
+
+        Log.d(getClass().getName(), "Events downloaded " + eventCount);
         return  calendars;
     }
 
@@ -75,11 +81,17 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
                 CalendarList calendarList = calendarService.calendarList().list().setPageToken(pageToken).execute();
                 List<CalendarListEntry> calItems = calendarList.getItems();
 
+                if(calItems.size() <= 0) {
+                    Log.w("DownloadFromCalendar", "warning downloaded calendars list is empty");
+                }
+
                 for (CalendarListEntry entry : calItems) {
                     calendars.add( new GCalendar(entry.getId(), entry.getSummary(), entry.getBackgroundColor(), entry.getForegroundColor() ));
                 }
                 pageToken = calendarList.getNextPageToken();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                Log.e("DownloadFromCalendar", "error during downloading calendars from google: " + e.toString());
+            }
         } while (pageToken != null);
 
         return calendars;
@@ -99,12 +111,20 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
                         .setSingleEvents(true)
                         .execute();
                 List<Event> items = events.getItems();
+                if(items.size() <= 0) {
+                    Log.w("DownloadFromCalendar", "warning downloaded event list is empty");
+                }
 
                 for (Event event : items) {
 //                    eventList.add(newGEvent(event, calEntry));
                     calEntry.events.add(newGEvent(event, calEntry));
                 }
-            } catch (IOException e) { }
+
+
+
+            } catch (IOException e) {
+                Log.e("DownloadFromCalendar", "error during downloading events from google: " + e.toString());
+            }
         }
 
         return calendars;
