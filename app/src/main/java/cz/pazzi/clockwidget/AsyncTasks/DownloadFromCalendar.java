@@ -3,6 +3,7 @@ package cz.pazzi.clockwidget.AsyncTasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import cz.pazzi.clockwidget.Activities.ChooseAccountActivity;
 import cz.pazzi.clockwidget.Interfaces.ICalendarListWatcher;
 import cz.pazzi.clockwidget.data.GCalendar;
 import cz.pazzi.clockwidget.data.GEvent;
@@ -70,6 +72,8 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
     }
 
     //TODO: after 5 minutes get error: "java.net.ConnectException: failed to connect to www.googleapis.com/216.58.213.10 (port 443) after 20000ms: isConnected failed: ECONNREFUSED (Connection refused)"
+    //TODO: 12-15 14:24:37.851    32567-767/cz.pazzi.clockwidget E/DownloadFromCalendar﹕ error during downloading calendars from google: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+    //TODO: E/Auth﹕ [GoogleAccountDataServiceImpl] getToken() failed. Status NETWORK_ERROR, Account: <ELLIDED:201991196>, App: cz.pazzi.clockwidget, Service: oauth2: https://www.googleapis.com/auth/calendar.readonly /n 12-15 16:23:00.280   9801-10370/? E/DownloadFromCalendar﹕ error during downloading calendars from google: java.io.IOException: NetworkError
 
     public static List<GCalendar> DownloadCalendars() {
         GoogleProvider gProvider =  GoogleProvider.getInstance();
@@ -91,7 +95,13 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
                     calendars.add( new GCalendar(entry.getId(), entry.getSummary(), entry.getBackgroundColor(), entry.getForegroundColor() ));
                 }
                 pageToken = calendarList.getNextPageToken();
-            } catch (IOException e) {
+            } catch (UserRecoverableAuthIOException userRecoverableException) {
+                Log.e("DownloadFromCalendar", "error during downloading calendars from google (UserRecoverableAuthIOException): " + userRecoverableException.toString());
+                if(GoogleProvider.getInstance().accountActivity != null) {
+                    Log.e("DownloadFromCalendar", "error ... starting activity: " + userRecoverableException.toString());
+                    GoogleProvider.getInstance().accountActivity.startActivityForResult(userRecoverableException.getIntent(), ChooseAccountActivity.REQUEST_AUTHORIZATION);
+                }
+            }   catch (IOException e) {
                 Log.e("DownloadFromCalendar", "error during downloading calendars from google: " + e.toString());
             }
         } while (pageToken != null);
@@ -113,9 +123,9 @@ public class DownloadFromCalendar extends AsyncTask<Void, Void, List<GCalendar>>
                         .setSingleEvents(true)
                         .execute();
                 List<Event> items = events.getItems();
-                if(items.size() <= 0) {
-                    Log.w("DownloadFromCalendar", "warning downloaded event list is empty");
-                }
+//                if(items.size() <= 0) {
+//                    Log.w("DownloadFromCalendar", "warning downloaded event list is empty");
+//                }
 
                 for (Event event : items) {
 //                    eventList.add(newGEvent(event, calEntry));

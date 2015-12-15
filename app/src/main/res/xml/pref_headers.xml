@@ -3,8 +3,8 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$GeneralPreferenceFragment"
-        android:title="@string/pref_header_general" />
+        android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$ChooseAccountPreferenceFragment"
+        android:title="@string/pref_header_account" />
 
     <header
         android:fragment="cz.pazzi.clockwidget.Activities.WidgetPreference$CalendarPreferenceFragment"

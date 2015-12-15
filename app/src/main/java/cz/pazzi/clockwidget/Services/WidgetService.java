@@ -118,11 +118,7 @@ public class WidgetService extends Service implements ICalendarListWatcher, IWid
         gProvider.AddListener(this);
         gProvider.SetWidgetUpdater(this);
 
-        if(gProvider.IsAccountSelected()) {
-            gProvider.DownloadCalendars();
-        } else {
-            gProvider.ShowChooseAccount();
-        }
+        gProvider.DownloadCalendars();
 
         clockThread.start();
 

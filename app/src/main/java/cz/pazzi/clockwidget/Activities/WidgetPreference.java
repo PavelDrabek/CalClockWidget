@@ -50,8 +50,6 @@ public class WidgetPreference extends PreferenceActivity {
 
     private int widgetId = -2;
 
-    //TODO: Change account option
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -172,18 +170,13 @@ public class WidgetPreference extends PreferenceActivity {
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
+    public static class ChooseAccountPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            GoogleProvider.getInstance().ShowChooseAccount();
+            getActivity().finish();
         }
     }
 
@@ -233,11 +226,11 @@ public class WidgetPreference extends PreferenceActivity {
                         }
                     });
 
-                    View view = calPref.getView(null, null);
-                    TextView titleView = (TextView) view.findViewById(android.R.id.title);
-                    TextView summaryView = (TextView) view.findViewById(android.R.id.summary);
-                    titleView.setTextColor(Color.RED);
-                    titleView.setBackgroundColor(Color.BLUE);
+//                    View view = calPref.getView(null, null);
+//                    TextView titleView = (TextView) view.findViewById(android.R.id.title);
+//                    TextView summaryView = (TextView) view.findViewById(android.R.id.summary);
+//                    titleView.setTextColor(Color.RED);
+//                    titleView.setBackgroundColor(Color.BLUE);
 
                     category.addPreference(calPref);
                 }
@@ -292,7 +285,7 @@ public class WidgetPreference extends PreferenceActivity {
 
     @Override
     protected boolean isValidFragment(String fragmentName) {
-        return GeneralPreferenceFragment.class.getName().equals(fragmentName)
+        return ChooseAccountPreferenceFragment.class.getName().equals(fragmentName)
                 || CalendarPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName);

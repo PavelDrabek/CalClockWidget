@@ -1,8 +1,13 @@
 package cz.pazzi.clockwidget.Providers;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
 
 import java.util.Calendar;
@@ -66,5 +71,25 @@ public class BitmapOperations {
         }
 
         return bitmap;
+    }
+
+    public static Bitmap DrawTextToBitmap(Bitmap original, String text) {
+        Canvas canvas = new Canvas(original);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE); // Text Color
+//        paint.setStrokeWidth(100); // Text Size
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)); // Text Overlapping Pattern
+        paint.setTextSize(original.getHeight() - 30);
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+        int x = (original.getWidth() - bounds.width())/2;
+        int y = (original.getHeight() - bounds.height()/2);
+
+        canvas.drawBitmap(original, 0, 0, paint);
+        canvas.drawText(text, x, y, paint);
+
+        return original;
     }
 }

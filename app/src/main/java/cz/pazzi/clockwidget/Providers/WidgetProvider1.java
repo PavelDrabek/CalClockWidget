@@ -44,27 +44,34 @@ public class WidgetProvider1 extends AppWidgetProvider {
     }
 
     @Override
+    public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
+        super.onRestored(context, oldWidgetIds, newWidgetIds);
+        Log.d("WidgetProvider", "onRestored");
+    }
+
+    @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d("WidgetProvider", "updating");
 
-        //TODO: if service not running, start service
-        //TODO: bitmap downloading...
-        //TODO: bitmap no events today
+        //TODO: if service not running, start service?
 
         if(WidgetService.instance == null) {
             Toast.makeText(context, "service is not running", Toast.LENGTH_SHORT).show();
         }
 
+        String message = null;
         List<GEvent> events = null;
         for (int widgetId : appWidgetIds) {
             events = GetEventsForWidget(context, widgetId);
+            message = GoogleProvider.getInstance().GetMessage();
+
             RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             remoteViews.setOnClickPendingIntent(R.id.imgSettings, getPreferenceIntent(context, widgetId, ONCLICK_CLOCK));
             remoteViews.setOnClickPendingIntent(R.id.part_clock, getClockIntent(context, widgetId, ONCLICK_CLOCK));
             remoteViews.setOnClickPendingIntent(R.id.part_timeline, getCalendarIntent(context, widgetId, ONCLICK_CLOCK));
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
-            UpdateTimeLine(context, widgetId, events);
+            UpdateTimeLine(context, widgetId, events, message);
         }
 
         UpdateClock(context);
@@ -129,13 +136,18 @@ public class WidgetProvider1 extends AppWidgetProvider {
         AppWidgetManager.getInstance(context).updateAppWidget(widgetComponent, remoteViews);
     }
 
-    private void UpdateTimeLine(Context context, int widgetId, List<GEvent> events) {
+    private void UpdateTimeLine(Context context, int widgetId, List<GEvent> events, String text) {
 
         DisplayMetrics metrics = context.getApplicationContext().getResources().getDisplayMetrics();
 
         Bitmap bitmap = BitmapOperations.GetTimelineBitmap(events);
         Bitmap scaledBitmap = BitmapOperations.ScaleBitmap(bitmap, metrics, 480, 40);
         scaledBitmap = BitmapOperations.DrawActualTime(scaledBitmap);
+
+        if(text != null && !text.equals("")){
+            Log.d("", "drawing text: " + text);
+            scaledBitmap = BitmapOperations.DrawTextToBitmap(scaledBitmap, text);
+        }
 
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         remoteViews.setImageViewBitmap(R.id.imgTimeline, scaledBitmap);

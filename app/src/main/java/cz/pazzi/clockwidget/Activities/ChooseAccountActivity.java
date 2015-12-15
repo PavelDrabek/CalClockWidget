@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -18,15 +19,20 @@ import cz.pazzi.clockwidget.Providers.GoogleProvider;
 
 public class ChooseAccountActivity extends AppCompatActivity {
 
-    static final int REQUEST_ACCOUNT_PICKER = 1000;
-    static final int REQUEST_AUTHORIZATION = 1001;
-    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    public static final int REQUEST_ACCOUNT_PICKER = 1000;
+    public static final int REQUEST_AUTHORIZATION = 1001;
+    public static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
 
+    TextView txtStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_account);
+
+        txtStatus = (TextView)findViewById(R.id.txtStatus);
+
+        GoogleProvider.getInstance().accountActivity = this;
     }
 
     @Override
@@ -37,11 +43,16 @@ public class ChooseAccountActivity extends AppCompatActivity {
 
     private void chooseAccount() {
         Log.d(getClass().getName(), "chooseAccount");
-        GoogleProvider gProvider = GoogleProvider.getInstance();
-        if(gProvider.IsInit()) {
-            startActivityForResult(gProvider.NewChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+
+        if(isGooglePlayServicesAvailable()) {
+            GoogleProvider gProvider = GoogleProvider.getInstance();
+            if (gProvider.IsInit()) {
+                startActivityForResult(gProvider.NewChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+            } else {
+                Log.w(getClass().getName(), "gProvider is not initialized");
+            }
         } else {
-            Log.w(getClass().getName(), "gProvider is not initialized");
+            txtStatus.setText("Google Play Services required: \nafter installing, choose account again in widget settings.");
         }
     }
 
@@ -84,17 +95,6 @@ public class ChooseAccountActivity extends AppCompatActivity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    /**
-     * Checks whether the device currently has a network connection.
-     * @return true if the device has a network connection, false otherwise.
-     */
-    private boolean isDeviceOnline() {
-        Log.d(getClass().getName(), "isDeviceOnline");
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
     }
 
     /**

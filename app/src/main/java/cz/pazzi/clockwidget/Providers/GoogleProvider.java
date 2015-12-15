@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Debug;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -41,7 +40,7 @@ public class GoogleProvider implements ICalendarListWatcher {
     private final static String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
 
     private Context context;
-    private Calendar mService;
+//    private Calendar mService;
     private GoogleAccountCredential mCredential;
 
     private List<GCalendar> calendars;
@@ -52,7 +51,15 @@ public class GoogleProvider implements ICalendarListWatcher {
     private boolean isInit = false;
     public boolean IsInit() { return isInit; }
 
-    public boolean IsAccountSelected() { return (mCredential == null ? false : mCredential.getSelectedAccountName() != null); }
+    private String message;
+    public String GetMessage() { return message; }
+
+    private boolean firstDownloadComplete;
+    public boolean FirstDownloadComplete() { return firstDownloadComplete; }
+
+    public boolean IsAccountSelected() { Log.d("isSelected", "credential is null = " + (mCredential == null));  return ( mCredential == null ? false : mCredential.getSelectedAccountName() != null); }
+
+    public ChooseAccountActivity accountActivity = null;
 
     private static GoogleProvider instance;
     public static GoogleProvider getInstance() {
@@ -65,6 +72,7 @@ public class GoogleProvider implements ICalendarListWatcher {
     private GoogleProvider() {
         instance = this;
         isInit = false;
+        firstDownloadComplete = false;
         watchers = new ArrayList<>();
 
         calendars = new ArrayList<>();
@@ -74,15 +82,12 @@ public class GoogleProvider implements ICalendarListWatcher {
     public void Init(Context context) {
         this.context = context;
 
-        mCredential = GoogleAccountCredential.usingOAuth2(
-                context, Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff())
+        mCredential = GoogleAccountCredential.usingOAuth2(context, Arrays.asList(SCOPES))
+                //.setBackOff(new ExponentialBackOff())
                 .setSelectedAccountName(GetAccountName());
 
-        mService = new com.google.api.services.calendar.Calendar.Builder(
-                transport, jsonFactory, mCredential)
-                .setApplicationName("Google Calendar API Android Quickstart")
-                .build();
+
+
 
         if(!IsAccountSelected()) {
             ShowChooseAccount();
@@ -112,6 +117,7 @@ public class GoogleProvider implements ICalendarListWatcher {
     }
 
     public void SetAccountName(String accountName) {
+        Log.d("googleProvider", "setting account name = " + accountName);
         Resources resources = context.getResources();
         SharedPreferences settings = context.getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -129,7 +135,10 @@ public class GoogleProvider implements ICalendarListWatcher {
     }
 
     public Calendar GetServiceCalendar() {
-        return mService;
+        return new com.google.api.services.calendar.Calendar.Builder(
+                transport, jsonFactory, mCredential)
+                .setApplicationName("Google Calendar API Android Quickstart")
+                .build();
 
 //        mCredential = GoogleAccountCredential.usingOAuth2(
 //                context, Arrays.asList(SCOPES))
@@ -154,9 +163,14 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     public void DownloadCalendars() {
         if(IsAccountSelected()) {
+            if(!firstDownloadComplete) {
+                message = "Downloading...";
+            }
             new DownloadFromCalendar(this).execute();
         } else {
+            message = "Account not selected";
             Log.w(getClass().getName(), "Cannot download calendars, because account is not selected!");
+            ShowChooseAccount();
         }
     }
 
@@ -180,7 +194,10 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     @Override
     public void OnCalendarsDownloaded(List<GCalendar> calendars) {
+        Log.d("", "Download calendars.. size = " + calendars.size());
         this.calendars = calendars;
+        firstDownloadComplete = true;
+        message = calendars.size() > 0 ? "" : "No events today";
 
         if(events == null) {
             events = new ArrayList<>();
@@ -199,15 +216,17 @@ public class GoogleProvider implements ICalendarListWatcher {
 
     @Override
     public void OnCalendarsError(String error) {
+        message = error;
         for (ICalendarListWatcher w: watchers) {
             w.OnCalendarsError(error);
         }
     }
 
-    private boolean isDeviceOnline() {
+    public boolean isDeviceOnline() {
         Log.d(getClass().getName(), "isDeviceOnline");
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }
+
 }
