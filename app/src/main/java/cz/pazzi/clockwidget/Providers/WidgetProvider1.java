@@ -40,7 +40,6 @@ public class WidgetProvider1 extends AppWidgetProvider {
         super.onEnabled(context);
         Log.d("WidgetProvider", "onEnabled");
 
-        WidgetService.StartService(context);
     }
 
     @Override
@@ -57,7 +56,8 @@ public class WidgetProvider1 extends AppWidgetProvider {
         //TODO: if service not running, start service?
 
         if(WidgetService.instance == null) {
-            Toast.makeText(context, "service is not running", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "service is null, starting service", Toast.LENGTH_SHORT).show();
+            WidgetService.StartService(context);
         }
 
         String message = null;

@@ -112,7 +112,7 @@ public class WidgetService extends Service implements ICalendarListWatcher, IWid
 
         instance = this;
 
-        Context context = getBaseContext();
+        Context context = getApplicationContext();
         GoogleProvider gProvider = GoogleProvider.getInstance();
         gProvider.Init(context);
         gProvider.AddListener(this);

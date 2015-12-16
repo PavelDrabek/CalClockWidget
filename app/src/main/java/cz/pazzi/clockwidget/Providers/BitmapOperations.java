@@ -66,6 +66,8 @@ public class BitmapOperations {
         float density = width / (float)(24 * 60);
         Calendar actual = Calendar.getInstance();
         int pixelOffset = (int)(density * (actual.get(Calendar.HOUR_OF_DAY) - 1) * 60 + actual.get(Calendar.MINUTE));
+        pixelOffset = (pixelOffset + bitmap.getWidth()) % bitmap.getWidth();
+
         for(int y = 0; y < height; y++) {
             bitmap.setPixel(pixelOffset, y, Color.BLACK);
         }

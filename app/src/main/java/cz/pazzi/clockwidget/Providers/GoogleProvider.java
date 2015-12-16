@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Debug;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -57,7 +58,16 @@ public class GoogleProvider implements ICalendarListWatcher {
     private boolean firstDownloadComplete;
     public boolean FirstDownloadComplete() { return firstDownloadComplete; }
 
-    public boolean IsAccountSelected() { Log.d("isSelected", "credential is null = " + (mCredential == null));  return ( mCredential == null ? false : mCredential.getSelectedAccountName() != null); }
+    public boolean IsAccountSelected() {
+        String acc = GetAccountName();
+        if(acc == null) {
+            Log.d(getClass().getName(), "IsAccountSelected: acc = null");
+        } else {
+            Log.d(getClass().getName(), "IsAccountSelected: acc = " + acc);
+        }
+
+        return !(acc == null || acc.isEmpty());
+    }
 
     public ChooseAccountActivity accountActivity = null;
 
@@ -131,10 +141,23 @@ public class GoogleProvider implements ICalendarListWatcher {
     private String GetAccountName() {
         Resources resources = context.getResources();
         SharedPreferences settings = context.getSharedPreferences(resources.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        return settings.getString(resources.getString(R.string.preference_account_name), null);
+        String accName = settings.getString(resources.getString(R.string.preference_account_name), null);
+
+        if(accName == null) {
+            Log.d(getClass().getName(), "Getting acc name: null");
+        } else {
+            Log.d(getClass().getName(), "Getting acc name: " + accName);
+        }
+
+        return accName;
     }
 
     public Calendar GetServiceCalendar() {
+        String accountName = GetAccountName();
+        Log.d(getClass().getName(), "Getting service calendar with account: " + accountName);
+
+        mCredential.setSelectedAccountName(GetAccountName());
+
         return new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, mCredential)
                 .setApplicationName("Google Calendar API Android Quickstart")
@@ -149,6 +172,18 @@ public class GoogleProvider implements ICalendarListWatcher {
 //                AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), mCredential)
 //                .setApplicationName("Google Calendar API Android Quickstart")
 //                .build();
+
+
+//        Calendar service = Calendar.builder(transport, new JacksonFactory())
+//                .setApplicationName("My Application's Name")
+//                .setHttpRequestInitializer(accessProtectedResource)
+//                .setJsonHttpRequestInitializer(new JsonHttpRequestInitializer() {
+//                    public void initialize(JsonHttpRequest request) {
+//                        CalendarRequest calRequest = (CalendarRequest) request;
+//                        calRequest.setKey("myCalendarSimpleAPIAccessKey");
+//                    }
+//
+//                }).build();
     }
 
     public Intent NewChooseAccountIntent() {
@@ -170,6 +205,7 @@ public class GoogleProvider implements ICalendarListWatcher {
         } else {
             message = "Account not selected";
             Log.w(getClass().getName(), "Cannot download calendars, because account is not selected!");
+            Log.w(getClass().getName(), "Saved account is: " + GetAccountName());
             ShowChooseAccount();
         }
     }
